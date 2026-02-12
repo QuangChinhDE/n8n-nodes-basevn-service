@@ -20,7 +20,7 @@ export const getTicketDetailsWithBlockDescription: INodeProperties[] = [
 				operation: ['getTicketDetailsWithBlock'],
 			},
 		},
-		description: 'The ID of the ticket',
+		description: 'ID của khối phiếu',
 	},
 	{
 		displayName: 'Response Selector',
@@ -38,7 +38,7 @@ export const getTicketDetailsWithBlockDescription: INodeProperties[] = [
 				operation: ['getTicketDetailsWithBlock'],
 			},
 		},
-		description: 'Select which field to return from response. Leave empty for full response.',
+		description: 'Chọn trường dữ liệu trả về. Để trống nếu muốn toàn bộ response.',
 	},
 ];
 
@@ -55,7 +55,7 @@ export async function execute(
 		id: ticketId,
 	});
 
-	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/get', body);
+	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/get.detail', body);
 	
 	if (response.code === 1) {
 		const result = processResponse(response, selector);

@@ -34,11 +34,11 @@ export const assignTicketDescription: INodeProperties[] = [
 				operation: ['assignTicket'],
 			},
 		},
-		description: 'Username performing the assignment',
+		description: 'Người thực thi của khối hiện tại đang có quyền giao việc',
 	},
 	{
-		displayName: 'Assignee',
-		name: 'assignee',
+		displayName: 'Assignees',
+		name: 'assignees',
 		type: 'string',
 		default: '',
 		required: true,
@@ -48,7 +48,7 @@ export const assignTicketDescription: INodeProperties[] = [
 				operation: ['assignTicket'],
 			},
 		},
-		description: 'Username of the person to assign the ticket to',
+		description: 'Người thực thi phiếu tại khối được gán (có thể nhiều người, cách nhau bằng dấu phẩy)',
 	},
 ];
 
@@ -60,12 +60,12 @@ export async function execute(
 
 	const ticketId = this.getNodeParameter('ticketId', index) as string;
 	const username = this.getNodeParameter('username', index) as string;
-	const assignee = this.getNodeParameter('assignee', index) as string;
+	const assignees = this.getNodeParameter('assignees', index) as string;
 
 	const body: IDataObject = cleanBody({
-		id: ticketId,
+		ticket_id: ticketId,
 		username,
-		assignee,
+		assignees,
 	});
 
 	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/assign', body);

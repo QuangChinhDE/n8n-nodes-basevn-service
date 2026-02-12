@@ -20,7 +20,7 @@ export const createTicketDescription: INodeProperties[] = [
 				operation: ['createTicket'],
 			},
 		},
-		description: 'Username of ticket creator',
+		description: 'Username là người tạo phiếu',
 	},
 	{
 		displayName: 'Service ID',
@@ -34,7 +34,21 @@ export const createTicketDescription: INodeProperties[] = [
 				operation: ['createTicket'],
 			},
 		},
-		description: 'ID of the service',
+		description: 'ID của Service',
+	},
+	{
+		displayName: 'Block ID',
+		name: 'block_id',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['createTicket'],
+			},
+		},
+		description: 'ID của block',
 	},
 	{
 		displayName: 'Ticket Name',
@@ -48,7 +62,7 @@ export const createTicketDescription: INodeProperties[] = [
 				operation: ['createTicket'],
 			},
 		},
-		description: 'Name/title of the ticket',
+		description: 'Tên phiếu',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -64,28 +78,35 @@ export const createTicketDescription: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Content',
-				name: 'content',
+				displayName: 'Assignees',
+				name: 'assignees',
+				type: 'string',
+				default: '',
+				description: 'Người thực thi phiếu (dùng khi khối có danh sách người thực thi cố định)',
+			},
+			{
+				displayName: 'Followers',
+				name: 'followers',
+				type: 'string',
+				default: '',
+				description: 'Người theo dõi phiếu (nhiều người cách nhau bằng dấu phẩy)',
+			},
+			{
+				displayName: 'Managers',
+				name: 'managers',
+				type: 'string',
+				default: '',
+				description: 'Quản lý thực thi (dùng khi khối là duyệt có yêu cầu QLTT)',
+			},
+			{
+				displayName: 'Root Content',
+				name: 'root_content',
 				type: 'string',
 				typeOptions: {
 					rows: 4,
 				},
 				default: '',
-				description: 'Description/content of the ticket',
-			},
-			{
-				displayName: 'Compound ID',
-				name: 'compound_id',
-				type: 'string',
-				default: '',
-				description: 'ID of the compound',
-			},
-			{
-				displayName: 'Group ID',
-				name: 'group_id',
-				type: 'string',
-				default: '',
-				description: 'ID of the group',
+				description: 'Mô tả phiếu',
 			},
 		],
 	},
@@ -115,8 +136,8 @@ export const createTicketDescription: INodeProperties[] = [
 						name: 'name',
 						type: 'string',
 						default: '',
-						placeholder: 'e.g., field_name',
-						description: 'Name of the custom field ("custom_" prefix will be added automatically)',
+						placeholder: 'e.g., lua_chon_1, date, base_thay_bo',
+						description: 'Tên custom field ("service_" prefix sẽ tự động thêm vào)',
 					},
 					{
 						displayName: 'Field Value',
@@ -139,6 +160,7 @@ export async function execute(
 
 	const username = this.getNodeParameter('username', index) as string;
 	const serviceId = this.getNodeParameter('service_id', index) as string;
+	const blockId = this.getNodeParameter('block_id', index) as string;
 	const name = this.getNodeParameter('name', index) as string;
 	const additionalFields = this.getNodeParameter('additionalFields', index, {}) as IDataObject;
 	
@@ -148,7 +170,7 @@ export async function execute(
 	if (customFieldsData.fields && Array.isArray(customFieldsData.fields)) {
 		for (const field of customFieldsData.fields as Array<{name: string; value: string}>) {
 			if (field.name && field.value) {
-				const fieldName = field.name.startsWith('custom_') ? field.name : `custom_${field.name}`;
+				const fieldName = field.name.startsWith('service_') ? field.name : `service_${field.name}`;
 				customFields[fieldName] = field.value;
 			}
 		}
@@ -157,6 +179,7 @@ export async function execute(
 	const body: IDataObject = cleanBody({
 		username,
 		service_id: serviceId,
+		block_id: blockId,
 		name,
 		...additionalFields,
 		...customFields,

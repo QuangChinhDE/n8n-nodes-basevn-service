@@ -20,7 +20,7 @@ export const executeTicketDescription: INodeProperties[] = [
 				operation: ['executeTicket'],
 			},
 		},
-		description: 'The ID of the ticket',
+		description: 'ID phiếu',
 	},
 	{
 		displayName: 'Username',
@@ -34,21 +34,141 @@ export const executeTicketDescription: INodeProperties[] = [
 				operation: ['executeTicket'],
 			},
 		},
-		description: 'Username performing the execution',
+		description: 'Người dùng có quyền thực thi phiếu',
 	},
 	{
-		displayName: 'Transition ID',
-		name: 'transitionId',
-		type: 'string',
-		default: '',
-		required: true,
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
 		displayOptions: {
 			show: {
 				resource: ['ticket'],
 				operation: ['executeTicket'],
 			},
 		},
-		description: 'ID of the transition to execute',
+		options: [
+			{
+				displayName: 'Current Ticket Block ID',
+				name: 'current_ticket_block_id',
+				type: 'string',
+				default: '',
+				description: 'ID khối hiện tại của phiếu (để trống sẽ tự động xác định khối luồng chính)',
+			},
+			{
+				displayName: 'Intent',
+				name: 'intent',
+				type: 'options',
+				options: [
+					{ name: 'Execute (Default)', value: '' },
+					{ name: 'Approve', value: 'approve' },
+					{ name: 'Reject', value: 'reject' },
+					{ name: 'Ask for More Info', value: 'ask' },
+					{ name: 'Mark Done', value: 'mark_done' },
+					{ name: 'Mark Failed', value: 'mark_failed' },
+				],
+				default: '',
+				description: 'Mục đích hành động: Để trống = Thực thi khối, approve = Duyệt, reject = Từ chối, ask = Yêu cầu bổ sung, mark_done = Hoàn thành, mark_failed = Thất bại',
+			},
+			{
+				displayName: 'Name',
+				name: 'name',
+				type: 'string',
+				default: '',
+				description: 'Tên phiếu (nếu muốn cập nhật)',
+			},
+			{
+				displayName: 'Note',
+				name: 'note',
+				type: 'string',
+				typeOptions: {
+					rows: 3,
+				},
+				default: '',
+				description: 'Ghi chú khi thực hiện khối duyệt/bước',
+			},
+		],
+	},
+	{
+		displayName: 'Ticket Custom Fields (service_)',
+		name: 'ticketCustomFields',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
+		placeholder: 'Add Ticket Custom Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['executeTicket'],
+			},
+		},
+		description: 'Custom fields của phiếu (phải điền đầy đủ CF bắt buộc nếu muốn tự động move qua khối tiếp theo)',
+		options: [
+			{
+				name: 'fields',
+				displayName: 'Field',
+				values: [
+					{
+						displayName: 'Field Name',
+						name: 'name',
+						type: 'string',
+						default: '',
+						placeholder: 'e.g., text, int, date, bay_thay_bo',
+						description: 'Tên custom field của phiếu ("service_" prefix sẽ tự động thêm)',
+					},
+					{
+						displayName: 'Field Value',
+						name: 'value',
+						type: 'string',
+						default: '',
+						description: 'Giá trị của custom field',
+					},
+				],
+			},
+		],
+	},
+	{
+		displayName: 'Block Custom Fields (custom_)',
+		name: 'blockCustomFields',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
+		placeholder: 'Add Block Custom Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['executeTicket'],
+			},
+		},
+		description: 'Custom fields của khối hiện tại',
+		options: [
+			{
+				name: 'fields',
+				displayName: 'Field',
+				values: [
+					{
+						displayName: 'Field Name',
+						name: 'name',
+						type: 'string',
+						default: '',
+						placeholder: 'e.g., ngay_hoan_thanh',
+						description: 'Tên custom field của khối ("custom_" prefix sẽ tự động thêm)',
+					},
+					{
+						displayName: 'Field Value',
+						name: 'value',
+						type: 'string',
+						default: '',
+						description: 'Giá trị của custom field',
+					},
+				],
+			},
+		],
 	},
 ];
 
@@ -60,12 +180,40 @@ export async function execute(
 
 	const ticketId = this.getNodeParameter('ticketId', index) as string;
 	const username = this.getNodeParameter('username', index) as string;
-	const transitionId = this.getNodeParameter('transitionId', index) as string;
+	const additionalFields = this.getNodeParameter('additionalFields', index, {}) as IDataObject;
+
+	// Process ticket custom fields (service_ prefix)
+	const ticketCustomFieldsData = this.getNodeParameter('ticketCustomFields', index, {}) as IDataObject;
+	const ticketCustomFields: IDataObject = {};
+	
+	if (ticketCustomFieldsData.fields && Array.isArray(ticketCustomFieldsData.fields)) {
+		for (const field of ticketCustomFieldsData.fields as Array<{name: string; value: string}>) {
+			if (field.name && field.value) {
+				const fieldName = field.name.startsWith('service_') ? field.name : `service_${field.name}`;
+				ticketCustomFields[fieldName] = field.value;
+			}
+		}
+	}
+
+	// Process block custom fields (custom_ prefix)
+	const blockCustomFieldsData = this.getNodeParameter('blockCustomFields', index, {}) as IDataObject;
+	const blockCustomFields: IDataObject = {};
+	
+	if (blockCustomFieldsData.fields && Array.isArray(blockCustomFieldsData.fields)) {
+		for (const field of blockCustomFieldsData.fields as Array<{name: string; value: string}>) {
+			if (field.name && field.value) {
+				const fieldName = field.name.startsWith('custom_') ? field.name : `custom_${field.name}`;
+				blockCustomFields[fieldName] = field.value;
+			}
+		}
+	}
 
 	const body: IDataObject = cleanBody({
-		id: ticketId,
+		ticket_id: ticketId,
 		username,
-		transition_id: transitionId,
+		...additionalFields,
+		...ticketCustomFields,
+		...blockCustomFields,
 	});
 
 	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/execute', body);

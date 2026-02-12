@@ -9,70 +9,18 @@ import { cleanBody, processResponse } from '../../shared/utils';
 
 export const getAllTicketsDescription: INodeProperties[] = [
 	{
-		displayName: 'Page',
-		name: 'page',
-		type: 'number',
-		default: 0,
+		displayName: 'Service ID',
+		name: 'service_id',
+		type: 'string',
+		default: '',
+		required: true,
 		displayOptions: {
 			show: {
 				resource: ['ticket'],
 				operation: ['getAllTickets'],
 			},
 		},
-		description: 'Page number for pagination (starts from 0)',
-	},
-	{
-		displayName: 'Additional Fields',
-		name: 'additionalFields',
-		type: 'collection',
-		placeholder: 'Add Field',
-		default: {},
-		displayOptions: {
-			show: {
-				resource: ['ticket'],
-				operation: ['getAllTickets'],
-			},
-		},
-		options: [
-			{
-				displayName: 'Block ID',
-				name: 'block_id',
-				type: 'string',
-				default: '',
-				description: 'Filter by block ID',
-			},
-			{
-				displayName: 'Limit',
-				name: 'limit',
-				type: 'number',
-				typeOptions: {
-					minValue: 1,
-				},
-				default: 50,
-				description: 'Max number of results to return',
-			},
-			{
-				displayName: 'Search Query',
-				name: 'q',
-				type: 'string',
-				default: '',
-				description: 'Search query to filter tickets',
-			},
-			{
-				displayName: 'Service ID',
-				name: 'service_id',
-				type: 'string',
-				default: '',
-				description: 'Filter by service ID',
-			},
-			{
-				displayName: 'Status',
-				name: 'status',
-				type: 'string',
-				default: '',
-				description: 'Filter by ticket status',
-			},
-		],
+		description: 'ID của Service',
 	},
 	{
 		displayName: 'Response Selector',
@@ -98,16 +46,14 @@ export async function execute(
 	index: number,
 ): Promise<INodeExecutionData[]> {
 	const returnData: INodeExecutionData[] = [];
-	const page = this.getNodeParameter('page', index, 0) as number;
-	const additionalFields = this.getNodeParameter('additionalFields', index, {}) as IDataObject;
+	const serviceId = this.getNodeParameter('service_id', index) as string;
 	const selector = this.getNodeParameter('responseSelector', index, '') as string;
 
 	const body: IDataObject = cleanBody({ 
-		page,
-		...additionalFields,
+		service_id: serviceId,
 	});
 	
-	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/list', body);
+	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/get.all', body);
 	
 	if (response.code === 1) {
 		const result = processResponse(response, selector);

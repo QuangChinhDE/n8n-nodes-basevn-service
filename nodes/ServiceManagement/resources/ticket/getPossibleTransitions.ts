@@ -9,8 +9,8 @@ import { cleanBody, processResponse } from '../../shared/utils';
 
 export const getPossibleTransitionsDescription: INodeProperties[] = [
 	{
-		displayName: 'Service ID',
-		name: 'serviceId',
+		displayName: 'Ticket ID',
+		name: 'ticketId',
 		type: 'string',
 		default: '',
 		required: true,
@@ -20,11 +20,11 @@ export const getPossibleTransitionsDescription: INodeProperties[] = [
 				operation: ['getPossibleTransitions'],
 			},
 		},
-		description: 'The ID of the service',
+		description: 'ID phiếu',
 	},
 	{
-		displayName: 'Block ID',
-		name: 'blockId',
+		displayName: 'Username',
+		name: 'username',
 		type: 'string',
 		default: '',
 		required: true,
@@ -34,7 +34,7 @@ export const getPossibleTransitionsDescription: INodeProperties[] = [
 				operation: ['getPossibleTransitions'],
 			},
 		},
-		description: 'The ID of the block',
+		description: 'Username người dùng',
 	},
 	{
 		displayName: 'Response Selector',
@@ -42,7 +42,7 @@ export const getPossibleTransitionsDescription: INodeProperties[] = [
 		type: 'options',
 		options: [
 			{ name: 'Full Response', value: '' },
-			{ name: 'Transitions Array', value: 'transitions' },
+			{ name: 'Actions Array', value: 'actions' },
 		],
 		default: '',
 		displayOptions: {
@@ -51,7 +51,7 @@ export const getPossibleTransitionsDescription: INodeProperties[] = [
 				operation: ['getPossibleTransitions'],
 			},
 		},
-		description: 'Select which field to return from response. Leave empty for full response.',
+		description: 'Chọn trường dữ liệu trả về. Để trống nếu muốn toàn bộ response.',
 	},
 ];
 
@@ -60,16 +60,16 @@ export async function execute(
 	index: number,
 ): Promise<INodeExecutionData[]> {
 	const returnData: INodeExecutionData[] = [];
-	const serviceId = this.getNodeParameter('serviceId', index) as string;
-	const blockId = this.getNodeParameter('blockId', index) as string;
+	const ticketId = this.getNodeParameter('ticketId', index) as string;
+	const username = this.getNodeParameter('username', index) as string;
 	const selector = this.getNodeParameter('responseSelector', index, '') as string;
 
 	const body: IDataObject = cleanBody({
-		service_id: serviceId,
-		block_id: blockId,
+		ticket_id: ticketId,
+		username,
 	});
 
-	const response = await serviceManagementApiRequest.call(this, 'POST', '/service/block/transition/list', body);
+	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/get.possible.actions', body);
 	
 	if (response.code === 1) {
 		const result = processResponse(response, selector);

@@ -9,6 +9,20 @@ import { cleanBody, processResponse } from '../../shared/utils';
 
 export const updateTicketCustomFieldsDescription: INodeProperties[] = [
 	{
+		displayName: 'Service ID',
+		name: 'service_id',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['updateTicketCustomFields'],
+			},
+		},
+		description: 'ID của Service',
+	},
+	{
 		displayName: 'Ticket ID',
 		name: 'ticketId',
 		type: 'string',
@@ -20,7 +34,7 @@ export const updateTicketCustomFieldsDescription: INodeProperties[] = [
 				operation: ['updateTicketCustomFields'],
 			},
 		},
-		description: 'The ID of the ticket',
+		description: 'ID của phiếu',
 	},
 	{
 		displayName: 'Username',
@@ -34,7 +48,21 @@ export const updateTicketCustomFieldsDescription: INodeProperties[] = [
 				operation: ['updateTicketCustomFields'],
 			},
 		},
-		description: 'Username performing the update',
+		description: 'Username người cập nhật',
+	},
+	{
+		displayName: 'Custom Field IDs',
+		name: 'custom_field_ids',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['updateTicketCustomFields'],
+			},
+		},
+		description: 'Danh sách ID các custom field cần cập nhật (cách nhau bằng dấu phẩy, ví dụ: service_text, service_lua_chon_1)',
 	},
 	{
 		displayName: 'Custom Fields',
@@ -51,7 +79,7 @@ export const updateTicketCustomFieldsDescription: INodeProperties[] = [
 				operation: ['updateTicketCustomFields'],
 			},
 		},
-		description: 'Custom fields to update',
+		description: 'Custom fields của phiếu (service_ prefix)',
 		options: [
 			{
 				name: 'fields',
@@ -62,14 +90,15 @@ export const updateTicketCustomFieldsDescription: INodeProperties[] = [
 						name: 'name',
 						type: 'string',
 						default: '',
-						description: 'Name of the custom field ("custom_" prefix will be added automatically)',
+						placeholder: 'e.g., text, lua_chon_1, date, bay_thay_bo',
+						description: 'Tên custom field ("service_" prefix sẽ tự động thêm vào)',
 					},
 					{
 						displayName: 'Field Value',
 						name: 'value',
 						type: 'string',
 						default: '',
-						description: 'Value of the custom field',
+						description: 'Giá trị của custom field',
 					},
 				],
 			},
@@ -83,8 +112,10 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const returnData: INodeExecutionData[] = [];
 
+	const serviceId = this.getNodeParameter('service_id', index) as string;
 	const ticketId = this.getNodeParameter('ticketId', index) as string;
 	const username = this.getNodeParameter('username', index) as string;
+	const customFieldIds = this.getNodeParameter('custom_field_ids', index) as string;
 	
 	const customFieldsData = this.getNodeParameter('customFields', index, {}) as IDataObject;
 	const customFields: IDataObject = {};
@@ -92,19 +123,21 @@ export async function execute(
 	if (customFieldsData.fields && Array.isArray(customFieldsData.fields)) {
 		for (const field of customFieldsData.fields as Array<{name: string; value: string}>) {
 			if (field.name && field.value) {
-				const fieldName = field.name.startsWith('custom_') ? field.name : `custom_${field.name}`;
+				const fieldName = field.name.startsWith('service_') ? field.name : `service_${field.name}`;
 				customFields[fieldName] = field.value;
 			}
 		}
 	}
 
 	const body: IDataObject = cleanBody({
-		id: ticketId,
+		service_id: serviceId,
+		ticket_id: ticketId,
 		username,
+		custom_field_ids: customFieldIds,
 		...customFields,
 	});
 
-	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/custom_field/update', body);
+	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/edit.custom.fields', body);
 
 	if (response.code === 1) {
 		const result = processResponse(response, '');

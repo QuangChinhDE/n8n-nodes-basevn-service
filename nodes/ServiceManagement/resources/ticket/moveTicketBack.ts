@@ -20,7 +20,7 @@ export const moveTicketBackDescription: INodeProperties[] = [
 				operation: ['moveTicketBack'],
 			},
 		},
-		description: 'The ID of the ticket',
+		description: 'ID phiếu',
 	},
 	{
 		displayName: 'Username',
@@ -34,7 +34,29 @@ export const moveTicketBackDescription: INodeProperties[] = [
 				operation: ['moveTicketBack'],
 			},
 		},
-		description: 'Username performing the move',
+		description: 'Username người thực hiện',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['moveTicketBack'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Current Ticket Block ID',
+				name: 'current_ticket_block_id',
+				type: 'string',
+				default: '',
+				description: 'ID khối hiện tại của phiếu (để trống sẽ tự động xác định khối luồng chính)',
+			},
+		],
 	},
 ];
 
@@ -46,13 +68,15 @@ export async function execute(
 
 	const ticketId = this.getNodeParameter('ticketId', index) as string;
 	const username = this.getNodeParameter('username', index) as string;
+	const additionalFields = this.getNodeParameter('additionalFields', index, {}) as IDataObject;
 
 	const body: IDataObject = cleanBody({
-		id: ticketId,
+		ticket_id: ticketId,
 		username,
+		...additionalFields,
 	});
 
-	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/move_back', body);
+	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/move.back', body);
 
 	if (response.code === 1) {
 		const result = processResponse(response, '');
