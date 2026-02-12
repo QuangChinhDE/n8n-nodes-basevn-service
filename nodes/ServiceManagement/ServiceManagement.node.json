@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-base.serviceManagement",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Integration"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://service.{domain}/extapi/v1"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://service.{domain}/extapi/v1"
+			}
+		]
+	}
+}
