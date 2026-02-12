@@ -91,7 +91,7 @@ export const executeTicketDescription: INodeProperties[] = [
 		],
 	},
 	{
-		displayName: 'Ticket Custom Fields (service_)',
+		displayName: 'Ticket Custom Fields (Service_)',
 		name: 'ticketCustomFields',
 		type: 'fixedCollection',
 		typeOptions: {
@@ -131,7 +131,7 @@ export const executeTicketDescription: INodeProperties[] = [
 		],
 	},
 	{
-		displayName: 'Block Custom Fields (custom_)',
+		displayName: 'Block Custom Fields (Custom_)',
 		name: 'blockCustomFields',
 		type: 'fixedCollection',
 		typeOptions: {
