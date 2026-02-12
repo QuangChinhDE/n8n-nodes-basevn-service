@@ -9,20 +9,6 @@ import { cleanBody, processResponse } from '../../shared/utils';
 
 export const getAllCompoundsDescription: INodeProperties[] = [
 	{
-		displayName: 'Service ID',
-		name: 'serviceId',
-		type: 'string',
-		default: '',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['service'],
-				operation: ['getAllCompounds'],
-			},
-		},
-		description: 'The ID of the service',
-	},
-	{
 		displayName: 'Response Selector',
 		name: 'responseSelector',
 		type: 'options',
@@ -46,12 +32,9 @@ export async function execute(
 	index: number,
 ): Promise<INodeExecutionData[]> {
 	const returnData: INodeExecutionData[] = [];
-	const serviceId = this.getNodeParameter('serviceId', index) as string;
 	const selector = this.getNodeParameter('responseSelector', index, '') as string;
 
-	const body: IDataObject = cleanBody({
-		service_id: serviceId,
-	});
+	const body: IDataObject = cleanBody({});
 
 	const response = await serviceManagementApiRequest.call(this, 'POST', '/compound/get.all', body);
 	
