@@ -37,7 +37,8 @@
 			"dist/credentials/ServiceManagementApi.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/ServiceManagement/ServiceManagement.node.js"
+			"dist/nodes/ServiceManagement/ServiceManagement.node.js",
+			"dist/nodes/ServiceManagement/ServiceManagementTrigger.node.js"
 		]
 	},
 	"devDependencies": {

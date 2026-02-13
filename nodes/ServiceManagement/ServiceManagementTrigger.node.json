@@ -1,0 +1,3 @@
+{
+	"node": "dist/nodes/ServiceManagement/ServiceManagementTrigger.node.js"
+}
