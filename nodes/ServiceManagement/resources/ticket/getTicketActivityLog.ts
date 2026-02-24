@@ -64,7 +64,7 @@ export const getTicketActivityLogDescription: INodeProperties[] = [
 		type: 'options',
 		options: [
 			{ name: 'Full Response', value: '' },
-			{ name: 'Activity Log Array', value: 'activity_log' },
+			{ name: 'Activity Log Array', value: 'activity_logs' },
 		],
 		default: '',
 		displayOptions: {

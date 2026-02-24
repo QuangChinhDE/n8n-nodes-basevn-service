@@ -29,7 +29,6 @@ export const getTicketDetailsWithBlockDescription: INodeProperties[] = [
 		options: [
 			{ name: 'Full Response', value: '' },
 			{ name: 'Ticket Object', value: 'ticket' },
-			{ name: 'Block Object', value: 'block' },
 		],
 		default: '',
 		displayOptions: {

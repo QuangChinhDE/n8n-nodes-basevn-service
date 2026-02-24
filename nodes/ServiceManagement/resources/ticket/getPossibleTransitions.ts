@@ -42,7 +42,7 @@ export const getPossibleTransitionsDescription: INodeProperties[] = [
 		type: 'options',
 		options: [
 			{ name: 'Full Response', value: '' },
-			{ name: 'Actions Array', value: 'actions' },
+			{ name: 'Actions Array', value: 'ticket_data.possible_actions' },
 		],
 		default: '',
 		displayOptions: {

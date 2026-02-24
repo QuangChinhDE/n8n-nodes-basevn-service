@@ -176,16 +176,23 @@ export async function execute(
 		}
 	}
 
-	const body: IDataObject = cleanBody({
+	const body: IDataObject = {
 		username,
 		service_id: serviceId,
 		block_id: blockId,
 		name,
-		...additionalFields,
 		...customFields,
-	});
+	};
 
-	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/create', body);
+	// Add optional fields from additionalFields
+	if (additionalFields.assignees) body.assignees = additionalFields.assignees;
+	if (additionalFields.followers) body.followers = additionalFields.followers;
+	if (additionalFields.managers) body.managers = additionalFields.managers;
+	if (additionalFields.root_content) body.root_content = additionalFields.root_content;
+
+	const cleanedBody = cleanBody(body);
+
+	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/create', cleanedBody);
 
 	if (response.code === 1) {
 		const result = processResponse(response, '');

@@ -89,6 +89,7 @@ export const updateTicketDescription: INodeProperties[] = [
 				name: 'name',
 				type: 'string',
 				default: '',
+				required: true,
 				description: 'Tên phiếu',
 			},
 			{
