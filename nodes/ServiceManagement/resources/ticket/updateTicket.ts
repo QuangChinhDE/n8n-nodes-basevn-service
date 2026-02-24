@@ -51,6 +51,20 @@ export const updateTicketDescription: INodeProperties[] = [
 		description: 'Username là người cập nhật phiếu',
 	},
 	{
+		displayName: 'Name',
+		name: 'name',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['updateTicket'],
+			},
+		},
+		description: 'Tên phiếu',
+	},
+	{
 		displayName: 'Update Fields',
 		name: 'updateFields',
 		type: 'collection',
@@ -83,14 +97,6 @@ export const updateTicketDescription: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Người theo dõi phiếu (nhiều người cách nhau bằng dấu phẩy)',
-			},
-			{
-				displayName: 'Name',
-				name: 'name',
-				type: 'string',
-				default: '',
-				required: true,
-				description: 'Tên phiếu',
 			},
 			{
 				displayName: 'Root Content',
@@ -155,6 +161,7 @@ export async function execute(
 	const serviceId = this.getNodeParameter('service_id', index) as string;
 	const ticketId = this.getNodeParameter('ticketId', index) as string;
 	const username = this.getNodeParameter('username', index) as string;
+	const name = this.getNodeParameter('name', index) as string;
 	const updateFields = this.getNodeParameter('updateFields', index, {}) as IDataObject;
 
 	// Process custom fields (service_ prefix)
@@ -174,6 +181,7 @@ export async function execute(
 		service_id: serviceId,
 		ticket_id: ticketId,
 		username,
+		name,
 		...updateFields,
 		...customFields,
 	});
