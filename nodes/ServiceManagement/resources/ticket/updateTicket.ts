@@ -110,46 +110,6 @@ export const updateTicketDescription: INodeProperties[] = [
 			},
 		],
 	},
-	{
-		displayName: 'Custom Fields',
-		name: 'customFields',
-		type: 'fixedCollection',
-		typeOptions: {
-			multipleValues: true,
-		},
-		placeholder: 'Add Custom Field',
-		default: {},
-		displayOptions: {
-			show: {
-				resource: ['ticket'],
-				operation: ['updateTicket'],
-			},
-		},
-		description: 'Custom fields của phiếu (service_ prefix)',
-		options: [
-			{
-				name: 'fields',
-				displayName: 'Field',
-				values: [
-					{
-						displayName: 'Field Name',
-						name: 'name',
-						type: 'string',
-						default: '',
-						placeholder: 'e.g., text, lua_chon_1, date, bang_1',
-						description: 'Tên custom field ("service_" prefix sẽ tự động thêm vào)',
-					},
-					{
-						displayName: 'Field Value',
-						name: 'value',
-						type: 'string',
-						default: '',
-						description: 'Giá trị của custom field',
-					},
-				],
-			},
-		],
-	},
 ];
 
 export async function execute(
@@ -164,26 +124,12 @@ export async function execute(
 	const name = this.getNodeParameter('name', index) as string;
 	const updateFields = this.getNodeParameter('updateFields', index, {}) as IDataObject;
 
-	// Process custom fields (service_ prefix)
-	const customFieldsData = this.getNodeParameter('customFields', index, {}) as IDataObject;
-	const customFields: IDataObject = {};
-	
-	if (customFieldsData.fields && Array.isArray(customFieldsData.fields)) {
-		for (const field of customFieldsData.fields as Array<{name: string; value: string}>) {
-			if (field.name && field.value) {
-				const fieldName = field.name.startsWith('service_') ? field.name : `service_${field.name}`;
-				customFields[fieldName] = field.value;
-			}
-		}
-	}
-
 	const body: IDataObject = cleanBody({
 		service_id: serviceId,
 		ticket_id: ticketId,
 		username,
 		name,
 		...updateFields,
-		...customFields,
 	});
 
 	const response = await serviceManagementApiRequest.call(this, 'POST', '/ticket/edit', body);

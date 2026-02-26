@@ -85,6 +85,13 @@ export const createTicketDescription: INodeProperties[] = [
 				description: 'Người thực thi phiếu (dùng khi khối có danh sách người thực thi cố định)',
 			},
 			{
+				displayName: 'Custom Field IDs',
+				name: 'custom_field_ids',
+				type: 'string',
+				default: '',
+				description: 'Danh sách ID các custom field cần nhập (cách nhau bằng dấu phẩy, ví dụ: service_text, service_lua_chon_1)',
+			},
+			{
 				displayName: 'Followers',
 				name: 'followers',
 				type: 'string',
